@@ -47,15 +47,16 @@ to anyone else.
 ## Prerequisites (per the versions confirmed as current for 26.2 at time of writing —
 recheck before building if it's been a while)
 
-- Minecraft 26.2, Fabric Loader 0.19.3, Fabric Loom 1.17, Gradle 9.5.1
+- Minecraft 26.2, Fabric Loader 0.19.3, Fabric Loom 1.17, **Gradle 9.7.1**
 - Fabric API 0.158.0+26.2
-- **Java 25 for the client-mod build specifically** — confirmed the hard way: Loom
-  needs to actually launch Minecraft 26.2 to set up its dev environment, and that
-  fails outright on Java 21 (`Minecraft 26.2 requires Java 25 but Gradle is using
-  21`). The hub subproject has no such requirement and builds fine on 21 — it's
-  plain Java with no Minecraft dependency at all.
+- **Java 26 for both subprojects.** Minecraft 26.2 itself requires at least
+  Java 25 to run (confirmed the hard way — Loom needs to launch the game to
+  set up its dev environment, fails outright below that). Running 26 rather
+  than pinning to the 25 floor per your own toolchain preference — this is
+  one version past what's been directly confirmed to work, so if CI throws
+  a version-pin error again, this is the first place to look.
 - HeadlessMc's own Java requirement for running 26.2 varies — check their docs;
-  likely also 25 given the same underlying game requirement, but verify rather
+  likely also 25+ given the same underlying game requirement, but verify rather
   than assume.
 - HeadlessMc (latest release) + `hmc-specifics` (26.2 build) + Baritone (26.2-compatible
   build) + optionally `hmc.assets.dummy` for the bots

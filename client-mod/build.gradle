@@ -1,5 +1,9 @@
 plugins {
-    id 'fabric-loom' version '1.17-SNAPSHOT'
+    // Confirmed against FabricMC/fabric-example-mod's actual 26.1.2 branch:
+    // the plugin id itself changed to 'net.fabricmc.fabric-loom' for the
+    // no-remap flow — 'fabric-loom' (bare) is the old remap-capable plugin
+    // and is not what 26.1+ projects use.
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
     id 'java'
 }
 
@@ -14,23 +18,36 @@ repositories {
     mavenCentral()
 }
 
+loom {
+    splitEnvironmentSourceSets()
+}
+
 dependencies {
-    // 26.1+ ships official Mojang mappings — but Loom still needs it declared
-    // explicitly via loom.officialMojangMappings(), it is NOT automatic just
-    // because Yarn is gone. Leaving the mappings configuration empty is what
-    // caused "Configuration 'mappings' has no dependencies" in CI.
+    // 26.1+ ships an already-unobfuscated client — there is nothing to map,
+    // and Mojang does not publish mapping files for these versions at all.
+    // Two earlier wrong guesses on this line: first omitting mappings
+    // entirely (Loom errored asking for a mappings dependency), then adding
+    // `mappings loom.officialMojangMappings()` (Loom errored because no such
+    // mappings exist to download for 26.2). Ground truth, confirmed against
+    // FabricMC/fabric-example-mod's actual 26.1.2 build.gradle: no mappings
+    // line at all, and dependencies use plain `implementation`, not
+    // `modImplementation`.
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 java {
-    // Minecraft 26.2 itself requires Java 25 at the toolchain level (Loom needs
-    // to actually run the game to set up its dev environment) — this isn't a
-    // mod-code style choice, 21 fails during Loom's Minecraft setup step.
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    // Minecraft 26.2 requires at least Java 25 at the toolchain level (Loom
+    // needs to actually run the game to set up its dev environment). Running
+    // 26 here — one version ahead of the floor — per your own toolchain;
+    // I haven't independently confirmed Loom 1.17 is happy building against
+    // 26 specifically rather than exactly 25, since every version-pin miss
+    // so far in this repo has been on this exact axis. If CI throws a new
+    // "requires Java 25" style error pinned to a ceiling rather than a
+    // floor, that's the next thing to check.
+    sourceCompatibility = JavaVersion.VERSION_26
+    targetCompatibility = JavaVersion.VERSION_26
 }
 
 processResources {
@@ -43,11 +60,11 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    it.options.release = 25
+    it.options.release = 26
 }
 
-// 26.1+ Loom projects no longer remap the built jar against Yarn — `jar` is the
-// final artifact, not `remapJar`.
+// 26.1+ Loom projects don't remap the built jar — `jar` is the final
+// artifact, not `remapJar`.
 jar {
     from("LICENSE") {
         rename { "${it}_${base.archivesName.get()}" }

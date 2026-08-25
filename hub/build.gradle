@@ -1,7 +1,10 @@
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    // Old coordinate was com.github.johnrengelman.shadow (unmaintained,
+    // predates Gradle 9). Current is com.gradleup.shadow — confirmed 9.6.1
+    // requires Gradle 9.2.0+ and supports Java 26/27.
+    id 'com.gradleup.shadow' version '9.6.1'
 }
 
 group = 'net.kamikaze'
@@ -16,8 +19,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_26
+    targetCompatibility = JavaVersion.VERSION_26
 }
 
 application {
@@ -28,5 +31,17 @@ shadowJar {
     archiveBaseName.set('hub')
     archiveClassifier.set('')
 }
+
+// The `application` plugin's distZip/distTar/startScripts tasks package the
+// plain `jar` task's output plus a runtime classpath — they know nothing
+// about shadowJar's fat jar, which lands at the same output path and
+// confused Gradle's task-output validation ("uses this output without
+// declaring a dependency"). We don't use any of these three tasks — the fat
+// jar from shadowJar is the only artifact this project ships — so disable
+// them outright rather than wiring up dependency declarations for tasks
+// nothing consumes.
+tasks.named('distZip') { enabled = false }
+tasks.named('distTar') { enabled = false }
+tasks.named('startScripts') { enabled = false }
 
 tasks.build.dependsOn tasks.shadowJar
