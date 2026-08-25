@@ -18,9 +18,16 @@ repositories {
     mavenCentral()
 }
 
-loom {
-    splitEnvironmentSourceSets()
-}
+// This mod is entirely client-only (see fabric.mod.json's "environment":
+// "client") — no common/server code exists, so splitEnvironmentSourceSets()
+// doesn't apply here. That call was copied from the example mod without
+// checking whether it fit; the real effect was restricting the default
+// `main` source set to server-safe classes only, which is exactly why
+// GuiGraphics, Minecraft(Client), and Fabric API's client.* packages all
+// came back "does not exist" — they were only visible from a `client`
+// source set this project never created. Removed entirely; a single
+// unsplit source set has full access to everything, which is what a
+// client-only mod actually wants.
 
 dependencies {
     // 26.1+ ships an already-unobfuscated client — there is nothing to map,

@@ -2,29 +2,35 @@ package net.kamikaze.botfleet;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 
 /**
- * IMPORTANT — read before assuming this compiles as-is:
+ * Corrected against the actual current (post-26.1-mappings-switch) Fabric
+ * docs rather than the older API this was first written against:
  *
- * The three lines below marked TODO-VERIFY reference Mojang-mapping class/method
- * names by long-standing convention (these names have been stable in official
- * mappings since 1.14, well before 26.1's obfuscation removal). I have not checked
- * them against the actual 26.2 Fabric API jar. Open this project with
- * fabric-api 0.158.0+26.2 on the classpath, let your IDE flag any mismatches — this
- * should be a couple of renames at most, not a rewrite, but flagging honestly rather
- * than asserting certainty on API surface this new.
+ * - HudRenderCallback was removed in Fabric API for 26.1 — replaced by
+ *   HudElementRegistry. Registration moved into onInitializeClient below
+ *   accordingly; see BotFleetHud for the render-side change.
+ * - The client command builder class itself changed name too: the current
+ *   official docs example (docs.fabricmc.net/develop/commands/basics, dated
+ *   after the mappings switch) uses `ClientCommands.literal(...)`, not
+ *   `ClientCommandManager.literal(...)` — the latter spelling only turned up
+ *   in an older, pre-2026 community wiki page, which is stale. Using the
+ *   current official spelling here.
  *
- * Registers a CLIENT-SIDE ONLY command via Fabric API's ClientCommandManager.
- * Client-side commands are intercepted and executed entirely inside your own
- * client BEFORE anything becomes a chat/command packet sent to the server — this
- * is what keeps it invisible to other players and structurally non-colliding with
- * Meteor's own (also client-side, also chat-box-driven) command parsing: two
- * client-side command registries watching the same text box for different
- * prefixes don't conflict, since Fabric's dispatcher and Meteor's each just claim
- * the literal prefixes they register and ignore everything else.
+ * TODO-VERIFY (real, remaining): I have the class name (`ClientCommands`)
+ * from a doc example but not its fully-qualified package — following the
+ * v2 package (`net.fabricmc.fabric.api.client.command.v2`) since that's
+ * where `ClientCommandManager` lived and a rename-in-place is the more
+ * likely shape of this change than a package move, but that's inference,
+ * not confirmation. Your IDE will resolve or correct this in seconds; I
+ * can't from here without direct access to the actual 0.158.0+26.2 jar.
+ *
+ * Registers a CLIENT-SIDE ONLY command. Client-side commands are
+ * intercepted and executed entirely inside your own client BEFORE anything
+ * becomes a chat/command packet sent to the server — this is what keeps it
+ * invisible to other players and structurally non-colliding with Meteor's
+ * own (also client-side, also chat-box-driven) command parsing.
  */
 public class BotFleetControlClient implements ClientModInitializer {
 
@@ -37,15 +43,15 @@ public class BotFleetControlClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(
-                ClientCommandManager.literal("bc")
-                    .then(ClientCommandManager.literal("list")
+                net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("bc")
+                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("list")
                         .executes(ctx -> {
                             hub.sendListRequest();
                             feedback(ctx, "Requested bot roster from hub.");
                             return 1;
                         }))
-                    .then(ClientCommandManager.argument("bot", StringArgumentType.word())
-                        .then(ClientCommandManager.argument("command", StringArgumentType.greedyString())
+                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument("bot", StringArgumentType.word())
+                        .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument("command", StringArgumentType.greedyString())
                             .executes(ctx -> {
                                 String bot = StringArgumentType.getString(ctx, "bot");
                                 String command = StringArgumentType.getString(ctx, "command");
@@ -58,15 +64,21 @@ public class BotFleetControlClient implements ClientModInitializer {
             );
         });
 
-        // TODO-VERIFY: HudRenderCallback's exact functional signature (GuiGraphics vs
-        // DrawContext parameter type, tick-delta parameter) can shift slightly between
-        // Fabric API minor versions — check against 0.158.0+26.2 if this doesn't
-        // compile straight away.
-        HudRenderCallback.EVENT.register(hud::render);
+        // HudElementRegistry replaces the removed HudRenderCallback. Per the
+        // current docs example, elements attach relative to a vanilla layer
+        // (here: right before chat) rather than subscribing to a generic
+        // "after everything" event the old API used.
+        net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.attachElementBefore(
+            net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.CHAT,
+            net.minecraft.util.Identifier.of("botfleet-control", "bot_log"),
+            hud::render
+        );
     }
 
     private void feedback(com.mojang.brigadier.context.CommandContext<net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource> ctx, String message) {
         // Client-side-only feedback, never sent to the server as chat.
+        // Component.literal confirmed against the current official docs
+        // example (same page as the ClientCommands rename above).
         ctx.getSource().sendFeedback(net.minecraft.network.chat.Component.literal("[BotFleet] " + message));
     }
 }
