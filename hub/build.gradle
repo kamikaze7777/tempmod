@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'net.kamikaze'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.11.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+application {
+    mainClass = 'net.kamikaze.botfleet.hub.Hub'
+}
+
+shadowJar {
+    archiveBaseName.set('hub')
+    archiveClassifier.set('')
+}
+
+tasks.build.dependsOn tasks.shadowJar

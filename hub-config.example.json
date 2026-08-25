@@ -1,0 +1,31 @@
+{
+  "port": 47321,
+  "bots": [
+    {
+      "id": "bot1",
+      "workingDir": "/home/kamikaze/hmc/bot1",
+      "launchCommand": [
+        "java",
+        "-Xmx1024M",
+        "-XX:+UseSerialGC",
+        "-jar", "headlessmc-launcher-wrapper.jar",
+        "launch", "fabric:26.2",
+        "-lwjgl",
+        "-commands"
+      ]
+    },
+    {
+      "id": "bot2",
+      "workingDir": "/home/kamikaze/hmc/bot2",
+      "launchCommand": [
+        "java",
+        "-Xmx1024M",
+        "-XX:+UseSerialGC",
+        "-jar", "headlessmc-launcher-wrapper.jar",
+        "launch", "fabric:26.2",
+        "-lwjgl",
+        "-commands"
+      ]
+    }
+  ]
+}

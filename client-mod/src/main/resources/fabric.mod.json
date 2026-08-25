@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "botfleet-control",
+  "version": "${version}",
+  "name": "Bot Fleet Control",
+  "description": "Client-side control panel for a headless Baritone bot fleet. Never touches server chat.",
+  "authors": ["kamikaze"],
+  "environment": "client",
+  "entrypoints": {
+    "client": ["net.kamikaze.botfleet.BotFleetControlClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "26.2",
+    "fabric-api": "*"
+  }
+}

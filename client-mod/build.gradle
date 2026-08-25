@@ -1,0 +1,50 @@
+plugins {
+    id 'fabric-loom' version '1.17-SNAPSHOT'
+    id 'java'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = "botfleet-control"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 26.1+ ships official Mojang mappings — no Yarn/intermediary dependency needed.
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    // Loom 1.17 on 26.x resolves official mappings automatically; no `mappings(...)`
+    // block needed here the way pre-26.1 projects required a Yarn coordinate.
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+processResources {
+    inputs.property "version", project.version
+    filteringCharset "UTF-8"
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    it.options.release = 21
+}
+
+// 26.1+ Loom projects no longer remap the built jar against Yarn — `jar` is the
+// final artifact, not `remapJar`.
+jar {
+    from("LICENSE") {
+        rename { "${it}_${base.archivesName.get()}" }
+    }
+}
