@@ -7,20 +7,14 @@ package net.kamikaze.botfleet;
  * callback receives a GuiGraphicsExtractor and a DeltaTracker, not a raw
  * GuiGraphics/float.
  *
- * Correction from the previous round: `MinecraftClient.getInstance().
- * textRenderer` (what this used last round) was based on a Fabric docs
- * example that turned out wrong on that point. Confirmed this round with
- * harder, independent evidence (official Mojang mapping dumps, matching
- * NeoForge/Forge javadoc): the real official names are
- * `net.minecraft.client.Minecraft` and — per the same long-standing
- * mapping convention, unchanged since 1.14 — the field is `font`, not
- * `textRenderer` (`textRenderer` is Yarn's name for the same field).
- *
- * TODO-VERIFY (real, remaining): GuiGraphicsExtractor's and DeltaTracker's
- * exact package paths, and drawTextWithShadow's precise parameter order,
- * aren't independently confirmed — only the class names themselves, from
- * a docs example whose other details have already proven unreliable once.
- * Your IDE's auto-import will resolve or correct these instantly.
+ * Confirmed against decompiled 26.2 source:
+ * - There is no drawTextWithShadow. The method is text(Font, String, int, int, int)
+ *   and defaults dropShadow=true internally — same visual as the old shadow-text
+ *   call, just under a different name.
+ * - Font lives in the same package as GuiGraphicsExtractor:
+ *   net.minecraft.client.gui.Font. Accessed here via Minecraft.getInstance().font.
+ * - Text color is ARGB as of 1.21.6+. 0xFFFFFF (RGB, alpha=0) renders invisible;
+ *   0xFFFFFFFF is opaque white.
  */
 public class BotFleetHud {
     private final HubConnection hub;
@@ -38,11 +32,11 @@ public class BotFleetHud {
         int lineHeight = 10;
 
         for (String line : lines) {
-            graphics.drawTextWithShadow(
+            graphics.text(
                 net.minecraft.client.Minecraft.getInstance().font,
                 line,
                 x, y,
-                0xFFFFFF
+                0xFFFFFFFF
             );
             y += lineHeight;
         }

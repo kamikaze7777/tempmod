@@ -66,13 +66,21 @@ recheck before building if it's been a while)
 ## ⚠️ Before this compiles
 
 Minecraft 26.1+ ships with **official Mojang mappings only** — Yarn is discontinued as
-of this version. The class/method names below (`net.minecraft.client.Minecraft`,
-`LocalPlayer`, etc.) follow long-standing Mojang-mapping convention, but I have not
-verified them against the actual 26.2 Fabric API sources at time of writing. **Open the
-project in your IDE with Fabric API 0.158.0+26.2 on the classpath and let it flag any
-renamed symbols before you assume this builds clean.** This is a real gap, not
-boilerplate caution — flagging it plainly rather than asserting false certainty on a
-version this new.
+of this version. Two symbols are now confirmed against **decompiled 26.2 source**,
+not docs:
+
+- `net.minecraft.resources.Identifier.fromNamespaceAndPath(namespace, path)` —
+  class name stayed `Identifier` (never `ResourceLocation`); only the package moved
+  off the old `net.minecraft.util`.
+- `GuiGraphicsExtractor.text(Font, String, int, int, int)` — there is no
+  `drawTextWithShadow`. `text(...)` defaults `dropShadow=true`. `Font` is
+  `net.minecraft.client.gui.Font`. Text color is ARGB (`0xFFFFFFFF`, not `0xFFFFFF`).
+
+Other names (`net.minecraft.client.Minecraft`, `font`, `ClientCommands`,
+`HudElementRegistry`, `Component.literal`) match current Fabric 26.2 docs +
+Mojang mapping dumps, but still let the IDE flag anything the 0.157.0+26.2
+classpath disagrees with before assuming a clean compile.
+
 
 ## Building locally
 

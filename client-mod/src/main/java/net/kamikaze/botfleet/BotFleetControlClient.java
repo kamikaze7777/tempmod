@@ -16,27 +16,16 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
  *   after the mappings switch) uses `ClientCommands.literal(...)`, not
  *   `ClientCommandManager.literal(...)` — the latter spelling only turned up
  *   in an older, pre-2026 community wiki page, which is stale. Using the
- *   current official spelling here.
+ *   current official spelling here. Package confirmed via Fabric docs
+ *   reference source: net.fabricmc.fabric.api.client.command.v2.ClientCommands.
  *
- * TODO-VERIFY (real, remaining): I have the class name (`ClientCommands`)
- * from a doc example but not its fully-qualified package — following the
- * v2 package (`net.fabricmc.fabric.api.client.command.v2`) since that's
- * where `ClientCommandManager` lived and a rename-in-place is the more
- * likely shape of this change than a package move, but that's inference,
- * not confirmation. Your IDE will resolve or correct this in seconds; I
- * can't from here without direct access to the actual 0.158.0+26.2 jar.
+ * Confirmed against decompiled 26.2 source: Identifier was never renamed to
+ * ResourceLocation — the class is still Identifier, just relocated. Package
+ * moved from the old net.minecraft.util to net.minecraft.resources. Static
+ * factory is Identifier.fromNamespaceAndPath(namespace, path).
  *
- * Correction from the previous round: I'd switched `Minecraft` to
- * `MinecraftClient` based on a Fabric docs HUD-page example — that page
- * turned out to be wrong (or stale) on that specific point. Confirmed with
- * harder evidence this round (official Mojang mapping dumps, matching
- * NeoForge/Forge javadoc, all independent of Fabric's own docs): the real
- * official name is `net.minecraft.client.Minecraft`, `MinecraftClient` is
- * strictly the Yarn-only name. Also switched `Identifier` to
- * `ResourceLocation` (package `net.minecraft.resources`, static factory
- * `fromNamespaceAndPath`) — confirmed via FabricMC's own current reference
- * doc source and, independently, a literal runtime stack trace showing the
- * real fully-qualified name.
+ * Official name for the client singleton is net.minecraft.client.Minecraft
+ * (`MinecraftClient` is Yarn-only). Field is `font`, not `textRenderer`.
  *
  * Registers a CLIENT-SIDE ONLY command. Client-side commands are
  * intercepted and executed entirely inside your own client BEFORE anything
@@ -82,7 +71,7 @@ public class BotFleetControlClient implements ClientModInitializer {
         // "after everything" event the old API used.
         net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.attachElementBefore(
             net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.CHAT,
-            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("botfleet-control", "bot_log"),
+            net.minecraft.resources.Identifier.fromNamespaceAndPath("botfleet-control", "bot_log"),
             hud::render
         );
     }
