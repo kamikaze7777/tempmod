@@ -14,11 +14,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      # Minecraft 26.2 itself requires Java 25 to run (Loom launches the real
+      # game to set up the decompiled/mapped dev environment), not just to
+      # compile mod code against — Java 21 fails during Loom's Minecraft setup
+      # step specifically, this isn't a mod-code compile target choice.
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '25'
 
       # No gradlew is committed to this repo (couldn't be generated offline while
       # scaffolding it - the wrapper jar's normal download source wasn't reachable
