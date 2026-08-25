@@ -5,7 +5,7 @@ Baritone, running on Fabric 26.2) driven from your **real** Minecraft client, wi
 touching in-game chat — so it never collides with Meteor's Baritone addon or anything
 else parsing chat client-side.
 
-## Architecture  
+## Architecture
 
 ```
  Your real client (Meteor etc.)          Bot instances (HeadlessMc, no render)
@@ -49,8 +49,14 @@ recheck before building if it's been a while)
 
 - Minecraft 26.2, Fabric Loader 0.19.3, Fabric Loom 1.17, Gradle 9.5.1
 - Fabric API 0.158.0+26.2
-- Java 21+ (HeadlessMc's own requirement varies by MC version — check their docs for
-  26.2 specifically)
+- **Java 25 for the client-mod build specifically** — confirmed the hard way: Loom
+  needs to actually launch Minecraft 26.2 to set up its dev environment, and that
+  fails outright on Java 21 (`Minecraft 26.2 requires Java 25 but Gradle is using
+  21`). The hub subproject has no such requirement and builds fine on 21 — it's
+  plain Java with no Minecraft dependency at all.
+- HeadlessMc's own Java requirement for running 26.2 varies — check their docs;
+  likely also 25 given the same underlying game requirement, but verify rather
+  than assume.
 - HeadlessMc (latest release) + `hmc-specifics` (26.2 build) + Baritone (26.2-compatible
   build) + optionally `hmc.assets.dummy` for the bots
 - Krypton 0.3.1 on the bot instances (native 26.2 support) for the networking-stack

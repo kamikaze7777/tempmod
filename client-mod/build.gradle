@@ -24,8 +24,11 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    // Minecraft 26.2 itself requires Java 25 at the toolchain level (Loom needs
+    // to actually run the game to set up its dev environment) — this isn't a
+    // mod-code style choice, 21 fails during Loom's Minecraft setup step.
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 processResources {
@@ -38,7 +41,7 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    it.options.release = 21
+    it.options.release = 25
 }
 
 // 26.1+ Loom projects no longer remap the built jar against Yarn — `jar` is the

@@ -46,6 +46,11 @@ public class Hub {
 
         System.out.println("[hub] " + bots.size() + " bot(s) started. Control server on port " + config.port + ".");
         // Keep the main thread alive; everything else runs on daemon threads.
-        Thread.currentThread().join();
+        try {
+            Thread.currentThread().join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("[hub] interrupted, shutting down.");
+        }
     }
 }
