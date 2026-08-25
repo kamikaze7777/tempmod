@@ -7,7 +7,7 @@ else parsing chat client-side.
 
 ## Architecture
 
-``` 
+```
  Your real client (Meteor etc.)          Bot instances (HeadlessMc, no render)
  ┌─────────────────────────┐             ┌───────────────┐ ┌───────────────┐
  │  client-mod              │            │ HeadlessMc #1  │ │ HeadlessMc #2 │  ...

@@ -15,10 +15,12 @@ repositories {
 }
 
 dependencies {
-    // 26.1+ ships official Mojang mappings — no Yarn/intermediary dependency needed.
+    // 26.1+ ships official Mojang mappings — but Loom still needs it declared
+    // explicitly via loom.officialMojangMappings(), it is NOT automatic just
+    // because Yarn is gone. Leaving the mappings configuration empty is what
+    // caused "Configuration 'mappings' has no dependencies" in CI.
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    // Loom 1.17 on 26.x resolves official mappings automatically; no `mappings(...)`
-    // block needed here the way pre-26.1 projects required a Yarn coordinate.
+    mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
