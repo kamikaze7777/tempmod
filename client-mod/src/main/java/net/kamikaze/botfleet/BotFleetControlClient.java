@@ -26,6 +26,18 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
  * not confirmation. Your IDE will resolve or correct this in seconds; I
  * can't from here without direct access to the actual 0.158.0+26.2 jar.
  *
+ * Correction from the previous round: I'd switched `Minecraft` to
+ * `MinecraftClient` based on a Fabric docs HUD-page example — that page
+ * turned out to be wrong (or stale) on that specific point. Confirmed with
+ * harder evidence this round (official Mojang mapping dumps, matching
+ * NeoForge/Forge javadoc, all independent of Fabric's own docs): the real
+ * official name is `net.minecraft.client.Minecraft`, `MinecraftClient` is
+ * strictly the Yarn-only name. Also switched `Identifier` to
+ * `ResourceLocation` (package `net.minecraft.resources`, static factory
+ * `fromNamespaceAndPath`) — confirmed via FabricMC's own current reference
+ * doc source and, independently, a literal runtime stack trace showing the
+ * real fully-qualified name.
+ *
  * Registers a CLIENT-SIDE ONLY command. Client-side commands are
  * intercepted and executed entirely inside your own client BEFORE anything
  * becomes a chat/command packet sent to the server — this is what keeps it
@@ -70,7 +82,7 @@ public class BotFleetControlClient implements ClientModInitializer {
         // "after everything" event the old API used.
         net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.attachElementBefore(
             net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.CHAT,
-            net.minecraft.util.Identifier.of("botfleet-control", "bot_log"),
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("botfleet-control", "bot_log"),
             hud::render
         );
     }
