@@ -5,7 +5,7 @@ Baritone, running on Fabric 26.2) driven from your **real** Minecraft client, wi
 touching in-game chat — so it never collides with Meteor's Baritone addon or anything
 else parsing chat client-side.
 
-## Architecture
+## Architecture  
 
 ```
  Your real client (Meteor etc.)          Bot instances (HeadlessMc, no render)
