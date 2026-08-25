@@ -1,0 +1,87 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  client-mod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # No gradlew is committed to this repo (couldn't be generated offline while
+      # scaffolding it - the wrapper jar's normal download source wasn't reachable
+      # from the sandbox this was built in). setup-gradle provisions Gradle directly
+      # instead. Run `gradle wrapper` locally once if you want a wrapper for local
+      # builds too.
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.1'
+
+      - name: Build client mod
+        working-directory: client-mod
+        run: gradle build --stacktrace
+
+      - name: Upload client-mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: botfleet-control-client-mod
+          path: client-mod/build/libs/*.jar
+          if-no-files-found: error
+
+  hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10'
+
+      - name: Build hub
+        working-directory: hub
+        run: gradle build --stacktrace
+
+      - name: Upload hub jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: botfleet-control-hub
+          path: hub/build/libs/hub-*.jar
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [client-mod, hub]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/botfleet-control-client-mod/*.jar
+            artifacts/botfleet-control-hub/*.jar
