@@ -53,8 +53,8 @@ java {
     // so far in this repo has been on this exact axis. If CI throws a new
     // "requires Java 25" style error pinned to a ceiling rather than a
     // floor, that's the next thing to check.
-    sourceCompatibility = JavaVersion.VERSION_26
-    targetCompatibility = JavaVersion.VERSION_26
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 processResources {
@@ -67,7 +67,7 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    it.options.release = 26
+    it.options.release = 25
 }
 
 // 26.1+ Loom projects don't remap the built jar — `jar` is the final
