@@ -1,4 +1,4 @@
-# bot-fleet-control
+# bot-fleet-control 
 
 A control system for a fleet of headless Baritone bots (HeadlessMc + hmc-specifics +
 Baritone, running on Fabric 26.2) driven from your **real** Minecraft client, without
